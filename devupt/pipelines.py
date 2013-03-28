@@ -14,8 +14,11 @@ class DevuptPipeline(object):
 
 class CleanerPipeline(object):
     def process_item(self, item, spider):
-        item['desc'] = re.sub('<[^<]+?>', '', item['desc']) # remove HTML tags
-        item['desc'] = re.sub('\s+', ' ', item['desc']) # remove whitespace
+        # general whitespace removal
+        for (name, val) in item.items():
+            #print "Working on " + name + " which has value " + val + "\n"
+            item[name] = re.sub('\s+', ' ', val).strip() # remove whitespace
+            #item['desc'] = re.sub('<[^<]+?>', '', item['desc']).strip() # remove HTML tags
         return item
 
 

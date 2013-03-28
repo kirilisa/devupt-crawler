@@ -15,3 +15,12 @@ class NewsItem(Item):
     link = Field()
     desc = Field()
     pass
+
+class ProjectItem(Item):
+    title = Field()    
+    link = Field()
+    language = Field()
+    desc = Field()
+    updated = Field()
+    stars = Field()
+    forks = Field()
