@@ -14,6 +14,7 @@ class NewsItem(Item):
     title = Field()
     link = Field()
     desc = Field()
+    cat = Field()
     pass
 
 class ProjectItem(Item):
@@ -24,3 +25,22 @@ class ProjectItem(Item):
     updated = Field()
     stars = Field()
     forks = Field()
+    cat = Field()
+
+class CourseItem(Item):
+    title = Field()    
+    link = Field()    
+    desc = Field()
+    university = Field()
+    universitylink = Field()
+    coursedate = Field()
+    courselength = Field()
+    cat = Field()
+
+class EventItem(Item):
+    title = Field()    
+    link = Field()    
+    desc = Field()
+    location = Field()
+    eventdate = Field()
+    cat = Field()

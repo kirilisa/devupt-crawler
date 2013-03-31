@@ -14,7 +14,8 @@ NEWSPIDER_MODULE = 'devupt.spiders'
 ITEM_PIPELINES = [
     'devupt.pipelines.CleanerPipeline',
     'devupt.pipelines.DuplicateLinksPipeline',
+    'devupt.pipelines.JsonWriterPipeline',
 ]
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'devupt (+http://www.yourdomain.com)'
+USER_AGENT = 'devupt (+http://www.yourdomain.com)'

@@ -11,7 +11,6 @@ class TechmemeSpider(XMLFeedSpider):
     #allowed_domains = ["techmeme.com"]
     start_urls = ["http://www.techmeme.com/feed.xml"]
     itertag = 'item'
-    items = []
 
     def parse_node(self, response, node):        
         data = node.select('./description/text()').extract()[0]
@@ -23,16 +22,9 @@ class TechmemeSpider(XMLFeedSpider):
             item['title'] = match.group(2)
             item['link'] = match.group(1)
             item['desc'] = match.group(3)
+            item['cat'] = "news"
 
-            self.items.append(item)            
             return item        
 
-    # this is called every time parse_node is finished with a node
-    def process_results(self, response, results):
-        self.log("We are finished!! Got %s items." % len(self.items))        
-        for item in results:
-            self.log("iterating through results... %s" % item['title'])
-        # now enter items into DB? Or better to do it individually above?
-        return results
         
 

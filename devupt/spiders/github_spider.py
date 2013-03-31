@@ -12,7 +12,7 @@ class GithubSpider(BaseSpider):
     start_urls = [
         "http://www.github.com/search?q=stars%3A%3A%3E5000&type=Repositories&s=stars"
         ]
-    items = []
+    item_cnt = 0
 
     def parse(self, response):
         self.log('Parsing page... depth is %s' % response.meta['depth'])
@@ -28,9 +28,11 @@ class GithubSpider(BaseSpider):
             item['updated'] = "".join(project.select('.//p[contains(@class, "updated-at")]/time/text()').extract())
             item['stars'] = "".join(project.select('.//li[contains(@class, "stargazers")]/a/text()').extract())
             item['forks'] = "".join(project.select('.//li[contains(@class, "forks")]/a/text()').extract())
+            item['cat'] = "projects"
 
             #print unicode(item['title']).encode('utf8')
-            self.items.append(item)
+            self.item_cnt += 1
+            yield item
 
         # try to parse the next page
         try:
@@ -39,7 +41,8 @@ class GithubSpider(BaseSpider):
             self.log("Moving onto next page: link is %s" % nextPageLink)
             yield Request(nextPageLink, callback = self.parse)
         except:
-            self.log("I have reached the last page... total items is %s" % len(self.items))
-            # now enter items into DB? Or better to do it individually above?
+            self.log("I have reached the last page... total items is %d" % self.item_cnt)
 
+        
+        
         
