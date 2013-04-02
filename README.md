@@ -9,6 +9,19 @@ A brief intro to Scrapy can be found here: http://doc.scrapy.org/en/latest/intro
 
 A Scrapy basic tutorial can be found here: http://http://doc.scrapy.org/en/latest/intro/tutorial.html. 
 
-Once you have it all installed, you would do as follows to run the techmeme crawler and save the results to items.json
+Crawlers will fall into the following categories:
+- news
+- projects
+- courses
+- events
+- tutorials
+
+There are currently the following crawlers written:
+- techmeme
+- github
+- coursera
+- meetup
+
+Once you have it all installed, you would do as follows to run, for instance, the techmeme crawler:
 - cd into the devupt directory
-- scrapy crawl techmeme -o items.json -t json
+- scrapy crawl techmeme
