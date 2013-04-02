@@ -1,3 +1,20 @@
+
+        for event in hxs.select('//div[contains(@class, "simple-card")]'):
+            if event.select('.//p[contains(@class, "muted")]/text()').extract(): # only meetups with upcoming meetup
+                item = EventItem()
+                item['title'] = event.select('.//h4[contains(@class, "loading")]/text()').extract()[0]
+                item['link'] = event.select('./a/@href').extract()[0]
+                item['desc'] = "TBA"                                
+                item['location'] = "TBA"
+                item['eventdate'] = event.select('.//p[contains(@class, "muted")]/text()').extract()[0]
+                item['cat'] = "events"
+
+                #print unicode(item['title']).encode('utf8')
+                self.item_cnt += 1
+                yield item
+
+
+
 {
 "photo":"https://s3.amazonaws.com/coursera/topics/algs4partII/large-icon.png",
 "preview_link":null,

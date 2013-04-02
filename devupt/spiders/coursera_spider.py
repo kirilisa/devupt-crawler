@@ -1,9 +1,8 @@
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
-from scrapy import log
+from devupt import utils
 from devupt.items import CourseItem
-from devupt.colors import bcolors
 import urlparse
 import json
 import re
@@ -19,7 +18,7 @@ class CourseraSpider(BaseSpider):
     item_cnt = 0
 
     def parse(self, response):
-        courses = json.loads(response.body)
+        courses = json.loads(response.body) # grab the JSON from the API search
         for course in courses:
             if self.cats[0] in course['category-ids']:
                 item = CourseItem()
@@ -35,6 +34,6 @@ class CourseraSpider(BaseSpider):
                 self.item_cnt += 1
                 yield item
 
-        self.log("All done... total items is %d" % self.item_cnt)
+        utils.devlog("All done... total items is %d" % self.item_cnt)
 
         

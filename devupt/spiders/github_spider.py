@@ -1,7 +1,7 @@
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
-from scrapy import log
+from devupt import utils
 from devupt.items import ProjectItem
 import urlparse
 import re
@@ -15,19 +15,19 @@ class GithubSpider(BaseSpider):
     item_cnt = 0
 
     def parse(self, response):
-        self.log('Parsing page... depth is %s' % response.meta['depth'])
+        utils.devlog('Parsing page... depth is %s' % response.meta['depth'])
         
         # grab info from projects on this page
         hxs = HtmlXPathSelector(response)        
         for project in hxs.select('//li[contains(@class, "public")]'):
             item = ProjectItem()
-            item['desc'] = "".join(project.select('.//p[contains(@class, "description")]/text()').extract())
-            item['title'] = "".join(project.select('./h3/a/text()').extract())
-            item['link'] = "https://github.com" + "".join(project.select('./h3/a/@href').extract())
-            item['language'] = "".join(project.select('./ul/li[1]/text()').extract())
-            item['updated'] = "".join(project.select('.//p[contains(@class, "updated-at")]/time/text()').extract())
-            item['stars'] = "".join(project.select('.//li[contains(@class, "stargazers")]/a/text()').extract())
-            item['forks'] = "".join(project.select('.//li[contains(@class, "forks")]/a/text()').extract())
+            item['desc'] = "" if not project.select('.//p[contains(@class, "description")]/text()').extract() else project.select('.//p[contains(@class, "description")]/text()').extract()[0]
+            item['title'] = project.select('./h3/a/text()').extract()[0]
+            item['link'] = urlparse.urljoin("https://github.com", project.select('./h3/a/@href').extract()[0])
+            item['language'] = project.select('./ul/li[1]/text()').extract()[0]
+            item['updated'] = project.select('.//p[contains(@class, "updated-at")]/time/text()').extract()[0]
+            item['stars'] = project.select('.//li[contains(@class, "stargazers")]/a/text()').extract()[0]
+            item['forks'] = project.select('.//li[contains(@class, "forks")]/a/text()').extract()[0]
             item['cat'] = "projects"
 
             #print unicode(item['title']).encode('utf8')
@@ -38,10 +38,10 @@ class GithubSpider(BaseSpider):
         try:
             nextPageLink = hxs.select('//div[contains(@class, "pagination")]/a[contains(@class, "next_page")]/@href').extract()[0]
             nextPageLink = urlparse.urljoin(response.url, nextPageLink)
-            self.log("Moving onto next page: link is %s" % nextPageLink)
+            utils.devlog("Moving onto next page: link is %s" % nextPageLink)
             yield Request(nextPageLink, callback = self.parse)
         except:
-            self.log("I have reached the last page... total items is %d" % self.item_cnt)
+            utils.devlog("I have reached the last page... total items is %d" % self.item_cnt)
 
         
         

@@ -38,9 +38,11 @@ class CourseItem(Item):
     cat = Field()
 
 class EventItem(Item):
+    host = Field()    
     title = Field()    
     link = Field()    
-    desc = Field()
+    desc = Field()    
     location = Field()
     eventdate = Field()
+    eventtime = Field()
     cat = Field()

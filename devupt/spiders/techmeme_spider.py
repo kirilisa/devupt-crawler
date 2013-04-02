@@ -1,7 +1,5 @@
-#from scrapy.spider import BaseSpider
-#from scrapy.selector import XmlXPathSelector
 from scrapy.contrib.spiders import XMLFeedSpider
-from scrapy import log
+from devupt import utils
 
 from devupt.items import NewsItem
 import re
