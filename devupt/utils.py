@@ -3,8 +3,15 @@
 from scrapy import log
 
 # custom logger with colors
-def devlog(msg):
-    log.msg(bcolors.WARNING + msg + bcolors.ENDC, level=log.INFO)
+def devlog(msg, lvl=''):
+    ll = log.INFO
+    if lvl == 'd':
+        ll = log.DEBUG
+    elif lvl == 'w':
+        ll = log.WARNING
+    elif lvl == 'e':
+        ll = log.ERROR
+    log.msg(bcolors.WARNING + msg + bcolors.ENDC, level=ll)
 
 class bcolors:
     HEADER = '\033[95m'

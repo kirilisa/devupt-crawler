@@ -10,7 +10,10 @@ import json
 import re
 import psycopg2
 import sys
+import urlparse
+import os
 from random import randrange
+from scrapy import log
 
 # cleans whitespace & HTML
 class CleanerPipeline(object):
@@ -39,6 +42,7 @@ class DuplicateLinksPipeline(object):
     def process_item(self, item, spider):
         if item['link']:
             if item['link'] in self.pages_seen:
+                utils.devlog("Link '%s' is a duplicate!" % item['link'], 'w')
                 raise DropItem("Duplicate link found: %s" % item)
             else:
                 self.pages_seen.add(item['link'])
@@ -65,17 +69,30 @@ class JsonWriterPipeline(object):
         self.file.write(line)
         return item
 
-# write to postgres DB
+    def close_spider(self, spider):
+        self.file.close()
+
+# write data to postgres DB
 class DBWriterPipeline(object):    
     table = ''
     cols = []
-    keysvals = {}
     conn = None 
     cur = None
     bad = 0
 
-    def open_spider(self, spider):        
-        # decide tables and columns to populate
+    # sets the crawler gotten from the classmethod below
+    def __init__(self, crawler):
+        self.crawler = crawler
+
+    # need this so we have access to the crawler engine
+    # and can manually shut the spider down if need be
+    @classmethod 
+    def from_crawler(cls, crawler):
+        ext = cls(crawler)
+        return ext
+        
+    def open_spider(self, spider):
+        # designate table and fields to populate
         if spider.name in ['techmeme']:
             self.table = 'du_agg_news'
             self.cols = ['title', 'link', 'blurb', 'src']
@@ -88,20 +105,27 @@ class DBWriterPipeline(object):
         elif spider.name in ['meetup']:
             self.table = 'du_agg_events'
             self.cols = ['title', 'link', 'blurb', 'host', 'location', 'event_date', 'event_time', 'src']
-
-        # open database for writing
-        try:
-            self.conn = psycopg2.connect(database='devupt_db', user='duagg', password='crunch1ngs') 
-            self.cur = self.conn.cursor()
+        else:
+            utils.devlog('Cannot get database table for type %s' % spider.name, 'e')
+            self.crawler.engine.close_spider(spider, 'Closed spider -- cannot get appropriate database table.')
             
+        # connect to database
+        try:
+            urlparse.uses_netloc.append('postgres') # set parsing scheme
+            url = urlparse.urlparse(os.environ['DATABASE_URL'])            
+            self.conn = psycopg2.connect("dbname=%s user=%s password=%s host=%s " % (url.path[1:], url.username, url.password, url.hostname))                        
+            self.cur = self.conn.cursor()
+        except KeyError, e:
+            utils.devlog("No DATABASE_URL is set - cannot get database connection information.", 'e')
+            self.crawler.engine.close_spider(spider, 'Closed spider -- cannot get database connection information.')
         except psycopg2.DatabaseError, e:
-            print "Could not connect to database: %s" % e    
+            utils.devlog("Could not connect to database: %s" % e, 'e')
+            self.crawler.engine.close_spider(spider, 'Closed spider -- cannot connect to database.')
         
     def process_item(self, item, spider):                
         try:
             # attempt to get get spider source
             self.cur.execute("select id from du_agg_sources where slug=%s;", (spider.name,)) 
-            #print "QRY: %s, CNT: %s" % (self.cur.query, self.cur.rowcount)
             if not self.cur.rowcount:
                 return item
             else:
@@ -112,13 +136,11 @@ class DBWriterPipeline(object):
                 item['stars'] = 0 if not item['stars'] else item['stars']
                 item['forks'] = 0 if not item['stars'] else item['forks']
                 self.cur.execute("select id from du_agg_languages where slug = %s or lower(title) = %s;", (item['lang'].lower(), item['lang'].lower())) 
-                #print "QRY: %s, CNT: %s" % (self.cur.query, self.cur.rowcount)
                 if not self.cur.rowcount:
                     self.bad += 1
                     return item
                 else:                    
                     item['lang'] = self.cur.fetchone()[0]
-                    print "\nLANGUAGE IS NOW: %s" % item['lang']
 
             # populate dict with fields/vals
             keysvals = dict.fromkeys(self.cols)
@@ -128,20 +150,19 @@ class DBWriterPipeline(object):
             # generate SQL and insert into the DB
             datarep = ("%s," * len(keysvals)).rstrip(',')
             sql = "insert into %s (%s) values (%s);" % (self.table, ', '.join(keysvals.keys()), datarep)            
-            print "\nSQL: %s ||| %s\n" % (sql, keysvals.values())
             self.cur.execute(sql, keysvals.values())
-            print "QRY: %s" % self.cur.query
-            self.conn.commit() # maybe should commit in close_spider instead?
+            #utils.devlog("QRY: %s" % self.cur.query)
+            self.conn.commit() # maybe should commit in close_spider instead of for each item
 
         except psycopg2.DatabaseError, e:
             if self.conn:
                 self.conn.rollback()
-            print "Failed to write DB: %s" % e  
+            self.bad += 1
+            utils.devlog("Failed to store itemed entitled '%s' via %s spider: %s" % (item['title'], spider.name, e))
 
         return item
 
     def close_spider(self, spider):
         if self.conn:
             self.conn.close()
-
-        print "\nBAD COUNT: %s" % self.bad
+        utils.devlog("Number of items not stored: %s" % self.bad)
