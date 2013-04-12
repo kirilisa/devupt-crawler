@@ -46,7 +46,7 @@ class DuplicateLinksPipeline(object):
 class JsonWriterPipeline(object):
     def open_spider(self, spider):
         if spider.name == 'techmeme':
-            self.file = open('json/techmeme.json', 'wb')
+            self.file = open('json/techmeme.json', 'r+b')
         elif spider.name == 'github':
             self.file = open('json/github.json', 'wb')
         elif spider.name == 'coursera':
@@ -57,8 +57,13 @@ class JsonWriterPipeline(object):
     
     def process_item(self, item, spider):
         line = json.dumps(dict(item)) + "\n"
+        line = line.replace("{", "[")
+        line = line.replace("}", "]")
         self.file.write(line)
         return item
+
+    def close_spider(self, spider):
+        self.file.close() 
 
 # write to postgres DB
 class DBWriterPipeline(object):
