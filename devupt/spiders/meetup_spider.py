@@ -44,13 +44,13 @@ class MeetupSpider(BaseSpider):
             #yield Request(link, callback = self.parseItem)
             item = EventItem()            
             item['link'] = event.select('./a[contains(@class, "list-time")]/@href').extract()[0]
-            item['eventdate'] = date.strftime("%B %d, %Y")
-            item['eventtime'] = event.select('./a[contains(@class, "list-time")]/text()').extract()[0] 
+            item['event_date'] = date.strftime("%B %d, %Y")
+            item['event_time'] = event.select('./a[contains(@class, "list-time")]/text()').extract()[0] 
             item['host'] = event.select('./div/a[contains(@class, "chapter-name")]/text()').extract()[0]
             item['title'] = event.select('./div/h4/a[contains(@class, "event-title")]/text()').extract()[0]
-            item['desc'] = ""                                
+            item['blurb'] = ""                                
             item['location'] = "TBA"
-            item['cat'] = "events"
+            item['src'] = "events"
             self.item_cnt += 1
             yield item
             
@@ -80,12 +80,12 @@ class MeetupSpider(BaseSpider):
         item = EventItem()
         item['link'] = response.url
         item['title'] = hxs.select('//div[contains(@id, "event-title")]/@data-name').extract()[0]
-        item['eventdate'] = "BLAH" if not hxs.select('//div[contains(@id, "event-content")]//li[contains(@id, "event-when")]//time[contains(@id, "event-start-time")]/p[1]/text()').extract() else "HAPPY"
+        item['event_date'] = "BLAH" if not hxs.select('//div[contains(@id, "event-content")]//li[contains(@id, "event-when")]//time[contains(@id, "event-start-time")]/p[1]/text()').extract() else "HAPPY"
         #item['location'] = hxs.select('//div[contains(@id, "event-content")]//li[contains(@id, "event-where")]/@data-name').extract()[0]
         #item['location'] += hxs.select('//div[contains(@id, "event-content")]//li[contains(@id, "event-where")]/@data-address').extract()[0]
-        #item['desc'] += hxs.select('//div[contains(@id, "event-content")]//li[contains(@id, "event-desc")]//p/text()').extract()[0]
+        #item['blurb'] += hxs.select('//div[contains(@id, "event-content")]//li[contains(@id, "event-desc")]//p/text()').extract()[0]
         #item['host'] = hxs.select('//div/a[contains(@class, "chapter-name")]/text()').extract()[0]
-        item['cat'] = "events"
+        item['src'] = "events"
         
         self.item_cnt += 1
         yield item

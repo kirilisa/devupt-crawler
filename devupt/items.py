@@ -13,36 +13,36 @@ class DevuptItem(Item):
 class NewsItem(Item):
     title = Field()
     link = Field()
-    desc = Field()
-    cat = Field()
+    blurb = Field()
+    src = Field()
     pass
 
 class ProjectItem(Item):
     title = Field()    
     link = Field()
-    language = Field()
-    desc = Field()
+    blurb = Field()
+    lang = Field()    
     updated = Field()
     stars = Field()
     forks = Field()
-    cat = Field()
+    src = Field()
 
 class CourseItem(Item):
     title = Field()    
     link = Field()    
-    desc = Field()
-    university = Field()
-    universitylink = Field()
-    coursedate = Field()
-    courselength = Field()
-    cat = Field()
+    blurb = Field()
+    school = Field()
+    school_link = Field()
+    course_date = Field()
+    course_length = Field()
+    src = Field()
 
-class EventItem(Item):
-    host = Field()    
+class EventItem(Item):    
     title = Field()    
     link = Field()    
-    desc = Field()    
+    blurb = Field()
+    host = Field()    
     location = Field()
-    eventdate = Field()
-    eventtime = Field()
-    cat = Field()
+    event_date = Field()
+    event_time = Field()
+    src = Field()

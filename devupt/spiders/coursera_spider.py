@@ -23,13 +23,13 @@ class CourseraSpider(BaseSpider):
             if self.cats[0] in course['category-ids']:
                 item = CourseItem()
                 item['title'] = course['name']
-                item['desc'] = course['short_description']
+                item['blurb'] = course['short_description']
                 item['link'] = urlparse.urljoin("https://www.coursera.org/course/", course['short_name'])
-                item['university'] = course['universities'][0]['name']
-                item['universitylink'] = urlparse.urljoin("http://coursera.org/", course['universities'][0]['short_name'])
-                item['coursedate'] = "TBA" if course['courses'][0]['start_date_string'] in [None, ""] else course['courses'][0]['start_date_string']
-                item['courselength'] = "TBA" if course['courses'][0]['duration_string'] in [None, ""] else course['courses'][0]['duration_string']
-                item['cat'] = "courses"
+                item['school'] = course['universities'][0]['name']
+                item['school_link'] = urlparse.urljoin("http://coursera.org/", course['universities'][0]['short_name'])
+                item['course_date'] = "TBA" if course['courses'][0]['start_date_string'] in [None, ""] else course['courses'][0]['start_date_string']
+                item['course_length'] = "TBA" if course['courses'][0]['duration_string'] in [None, ""] else course['courses'][0]['duration_string']
+                item['src'] = "courses"
 
                 self.item_cnt += 1
                 yield item

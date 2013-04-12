@@ -19,8 +19,8 @@ class TechmemeSpider(XMLFeedSpider):
             item = NewsItem()
             item['title'] = match.group(2)
             item['link'] = match.group(1)
-            item['desc'] = match.group(3)
-            item['cat'] = "news"
+            item['blurb'] = match.group(3)
+            item['src'] = "news"
 
             return item        
 
